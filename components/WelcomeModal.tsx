@@ -9,9 +9,9 @@ interface WelcomeModalProps {
 export default function WelcomeModal({ onClose }: WelcomeModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-2xl max-h-screen flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Welcome to AI Attendance Tracker</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl max-h-screen flex flex-col border dark:border-slate-700">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">Welcome to AI Attendance Tracker</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -22,7 +22,7 @@ export default function WelcomeModal({ onClose }: WelcomeModalProps) {
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="text-center mb-6">
-            <p className="text-gray-600 dark:text-gray-300">
+            <p className="text-gray-600 dark:text-slate-300">
               Follow these simple steps to track your attendance with AI-powered analysis
             </p>
           </div>
@@ -33,8 +33,8 @@ export default function WelcomeModal({ onClose }: WelcomeModalProps) {
                 1
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Set Your Goals</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Set Your Goals</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300">
                   Click the <Settings className="w-4 h-4 inline mx-1" /> settings icon to configure your attendance goals and semester end date.
                 </p>
               </div>
@@ -45,8 +45,8 @@ export default function WelcomeModal({ onClose }: WelcomeModalProps) {
                 2
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Upload Screenshots</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Upload Screenshots</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300 mb-2">
                   Go to the <BarChart3 className="w-4 h-4 inline mx-1" /> Analysis tab and upload screenshots from:
                 </p>
                 <div className="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded border-l-4 border-yellow-500">
@@ -66,8 +66,8 @@ export default function WelcomeModal({ onClose }: WelcomeModalProps) {
                 3
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Analyze & Track</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-900 dark:text-slate-100 mb-2">Analyze & Track</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-300">
                   Click "Analyze Screenshots" to let AI extract your attendance data automatically. View your progress and plan your bunking strategy!
                 </p>
               </div>
@@ -75,14 +75,14 @@ export default function WelcomeModal({ onClose }: WelcomeModalProps) {
           </div>
 
           <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">📱 Mobile Users</h4>
-            <p className="text-sm text-gray-600 dark:text-gray-300">
+            <h4 className="font-medium text-gray-900 dark:text-slate-100 mb-2">📱 Mobile Users</h4>
+            <p className="text-sm text-gray-600 dark:text-slate-300">
               Take full-screen screenshots of your attendance page. The AI will automatically focus on the important data and ignore browser UI.
             </p>
           </div>
         </div>
 
-        <div className="flex justify-end p-6 border-t border-gray-200 dark:border-gray-800">
+        <div className="flex justify-end p-6 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700/50">
           <button
             onClick={onClose}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
