@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Settings } from '@/types';
 import { X, Save, Download, Upload, Trash2 } from 'lucide-react';
+import Toast from './Toast';
 
 interface Props {
   settings: Settings;
@@ -15,10 +16,12 @@ interface Props {
 
 export default function SettingsPanel({ settings, onUpdateSettings, onClose, onClearData, onExportData, onImportData }: Props) {
   const [formData, setFormData] = useState<Settings>(settings);
+  const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
   const handleSave = () => {
     onUpdateSettings(formData);
-    onClose();
+    setToast({ type: 'success', message: 'Settings saved successfully!' });
+    setTimeout(onClose, 1000);
   };
 
   const handleChange = (field: keyof Settings, value: string | number) => {
@@ -166,6 +169,15 @@ export default function SettingsPanel({ settings, onUpdateSettings, onClose, onC
             <span>Save Settings</span>
           </button>
         </div>
+        
+        {/* Toast Notification */}
+        {toast && (
+          <Toast
+            type={toast.type}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
+        )}
       </div>
     </div>
   );

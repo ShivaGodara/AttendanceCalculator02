@@ -5,6 +5,7 @@ import { analyzeLeaves } from '@/lib/gemini';
 import { calculatePercentage } from '@/lib/utils';
 import { Subject } from '@/types';
 import { Upload, Trash2, Scan, Calculator, AlertCircle, RefreshCw, X } from 'lucide-react';
+import Toast from './Toast';
 
 interface LeaveCount {
   cocurricular: number;
@@ -41,6 +42,7 @@ export default function LeaveAnalysisTab({ subjects }: Props) {
   const [step, setStep] = useState<'upload' | 'scan' | 'calculate'>('upload');
   const [error, setError] = useState<string | null>(null);
   const [retryFunction, setRetryFunction] = useState<(() => void) | null>(null);
+  const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -66,6 +68,7 @@ export default function LeaveAnalysisTab({ subjects }: Props) {
           setCurrentTotal(result.attendance.total);
         }
         setStep('scan');
+        setToast({ type: 'success', message: 'Leave analysis completed successfully!' });
         console.log('Leave analysis result:', result);
       } catch (error) {
         console.error('Error analyzing leaves:', error);
@@ -343,6 +346,14 @@ export default function LeaveAnalysisTab({ subjects }: Props) {
             Start New Analysis
           </button>
         </div>
+      )}
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );

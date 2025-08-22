@@ -5,6 +5,7 @@ import { Subject, Settings } from '@/types';
 import { calculatePercentage, getAttendanceStatus, getStatusColor, calculateRequiredClasses } from '@/lib/utils';
 import { analyzeTimetable, analyzeAttendance } from '@/lib/gemini';
 import { Upload, Plus, Trash2, AlertCircle, RefreshCw, X } from 'lucide-react';
+import Toast from './Toast';
 
 interface Props {
   subjects: Subject[];
@@ -18,6 +19,7 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
   const [retryFunction, setRetryFunction] = useState<(() => void) | null>(null);
   const [timetableFile, setTimetableFile] = useState<File | null>(null);
   const [attendanceFile, setAttendanceFile] = useState<File | null>(null);
+  const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,7 +74,7 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
     try {
       const result = await analyzeTimetable(timetableFile);
       console.log('Timetable analyzed:', result);
-      alert('Timetable analyzed successfully! Check console for details.');
+      setToast({ type: 'success', message: 'Timetable analyzed successfully!' });
     } catch (error) {
       console.error('Error analyzing timetable:', error);
       setError('Failed to analyze timetable. Please check your API key and try again.');
@@ -105,9 +107,9 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
           goal: settings.individualGoal
         }));
         onUpdateSubjects([...subjects, ...newSubjects]);
-        alert(`Successfully added ${newSubjects.length} subjects!`);
+        setToast({ type: 'success', message: `Successfully added ${newSubjects.length} subjects!` });
       } else {
-        setError('No subjects found in the image. Please try a clearer screenshot.');
+        setToast({ type: 'info', message: 'No subjects found in the image. Please try a clearer screenshot.' });
       }
     } catch (error) {
       console.error('Error analyzing attendance:', error);
@@ -366,6 +368,14 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
           </div>
         )}
       </div>
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

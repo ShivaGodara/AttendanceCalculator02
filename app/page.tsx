@@ -7,6 +7,7 @@ import AnalysisTab from '@/components/AnalysisTab';
 import BunkPlannerTab from '@/components/BunkPlannerTab';
 import LeaveAnalysisTab from '@/components/LeaveAnalysisTab';
 import SettingsPanel from '@/components/SettingsPanel';
+import Toast from '@/components/Toast';
 import { Settings as SettingsIcon, BarChart3, Calendar, FileText, Sun, Moon } from 'lucide-react';
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
   const [appData, setAppData] = useState<AppData>({
     subjects: [],
     settings: {
@@ -75,6 +77,7 @@ export default function Home() {
       timetable: []
     });
     setShowClearDialog(false);
+    setToast({ type: 'success', message: 'All data cleared successfully!' });
   };
 
   const exportData = () => {
@@ -86,6 +89,7 @@ export default function Home() {
     link.download = `attendance-data-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
+    setToast({ type: 'success', message: 'Data exported successfully!' });
   };
 
   const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,9 +102,12 @@ export default function Home() {
         const data = JSON.parse(e.target?.result as string);
         if (data.subjects && data.settings) {
           setAppData(data);
+          setToast({ type: 'success', message: 'Data imported successfully!' });
+        } else {
+          setToast({ type: 'error', message: 'Invalid file format!' });
         }
       } catch {
-        alert('Invalid file format');
+        setToast({ type: 'error', message: 'Failed to import data!' });
       }
     };
     reader.readAsText(file);
@@ -229,6 +236,15 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
