@@ -6,6 +6,7 @@ import { calculatePercentage, getAttendanceStatus, getStatusColor, calculateRequ
 import { analyzeTimetable, analyzeAttendance } from '@/lib/gemini';
 import { Upload, Plus, Trash2, AlertCircle, RefreshCw, X } from 'lucide-react';
 import Toast from './Toast';
+import EnhancedUpload from './EnhancedUpload';
 
 interface Props {
   subjects: Subject[];
@@ -17,8 +18,7 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryFunction, setRetryFunction] = useState<(() => void) | null>(null);
-  const [timetableFile, setTimetableFile] = useState<File | null>(null);
-  const [attendanceFile, setAttendanceFile] = useState<File | null>(null);
+
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
 
   useEffect(() => {
@@ -59,62 +59,36 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
     onUpdateSubjects(subjects.filter(s => s.id !== id));
   };
 
-  const handleTimetableUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setTimetableFile(file);
-    }
-  };
-
-  const analyzeTimetableFile = async () => {
-    if (!timetableFile) return;
-
+  const handleEnhancedAnalyze = async (files: any[]) => {
     setLoading(true);
     setError(null);
+    
     try {
-      const result = await analyzeTimetable(timetableFile);
-      console.log('Timetable analyzed:', result);
-      setToast({ type: 'success', message: 'Timetable analyzed successfully!' });
-    } catch (error) {
-      console.error('Error analyzing timetable:', error);
-      setError('Failed to analyze timetable. Please check your API key and try again.');
-      setRetryFunction(() => analyzeTimetableFile);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAttendanceUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setAttendanceFile(file);
-    }
-  };
-
-  const analyzeAttendanceFile = async () => {
-    if (!attendanceFile) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await analyzeAttendance(attendanceFile);
-      if (result.subjects && result.subjects.length > 0) {
-        const newSubjects = result.subjects.map((s: any) => ({
-          id: Date.now().toString() + Math.random(),
-          name: s.name,
-          attended: s.attended,
-          total: s.total,
-          goal: settings.individualGoal
-        }));
-        onUpdateSubjects([...subjects, ...newSubjects]);
-        setToast({ type: 'success', message: `Successfully added ${newSubjects.length} subjects!` });
-      } else {
-        setToast({ type: 'info', message: 'No subjects found in the image. Please try a clearer screenshot.' });
+      for (const uploadedFile of files) {
+        if (uploadedFile.type === 'timetable' || uploadedFile.type === 'auto') {
+          const result = await analyzeTimetable(uploadedFile.file);
+          console.log('Timetable analyzed:', result);
+          setToast({ type: 'success', message: 'Timetable analyzed successfully!' });
+        }
+        
+        if (uploadedFile.type === 'attendance' || uploadedFile.type === 'auto') {
+          const result = await analyzeAttendance(uploadedFile.file);
+          if (result.subjects && result.subjects.length > 0) {
+            const newSubjects = result.subjects.map((s: any) => ({
+              id: Date.now().toString() + Math.random(),
+              name: s.name,
+              attended: s.attended,
+              total: s.total,
+              goal: settings.individualGoal
+            }));
+            onUpdateSubjects([...subjects, ...newSubjects]);
+            setToast({ type: 'success', message: `Successfully added ${newSubjects.length} subjects!` });
+          }
+        }
       }
     } catch (error) {
-      console.error('Error analyzing attendance:', error);
-      setError('Failed to analyze attendance. Please check your API key and try again.');
-      setRetryFunction(() => analyzeAttendanceFile);
+      console.error('Error analyzing files:', error);
+      setError('Failed to analyze files. Please check your API key and try again.');
     } finally {
       setLoading(false);
     }
@@ -223,89 +197,13 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
           </div>
         </div>
       )}
-      {/* AI Upload Section */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg dark:shadow-gray-900/50 p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">AI-Powered Data Entry</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Upload Timetable Screenshot
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleTimetableUpload}
-              className="hidden"
-              id="timetable-upload"
-            />
-            <label
-              htmlFor="timetable-upload"
-              className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-lg cursor-pointer"
-            >
-              <div className="text-center">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Click to upload timetable
-                </span>
-              </div>
-            </label>
-            {timetableFile && (
-              <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
-                <span className="text-sm text-green-800 dark:text-green-200">✓ {timetableFile.name}</span>
-              </div>
-            )}
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Upload Attendance Report
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleAttendanceUpload}
-              className="hidden"
-              id="attendance-upload"
-            />
-            <label
-              htmlFor="attendance-upload"
-              className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 hover:border-gray-400 rounded-lg cursor-pointer"
-            >
-              <div className="text-center">
-                <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Click to upload attendance
-                </span>
-              </div>
-            </label>
-            {attendanceFile && (
-              <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
-                <span className="text-sm text-green-800 dark:text-green-200">✓ {attendanceFile.name}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Analyze Button */}
-        {(timetableFile || attendanceFile) && (
-          <div className="mt-6">
-            <button
-              onClick={async () => {
-                if (timetableFile) await analyzeTimetableFile();
-                if (attendanceFile) await analyzeAttendanceFile();
-              }}
-              disabled={loading}
-              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? (
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-              ) : (
-                <Upload className="w-4 h-4" />
-              )}
-              <span>{loading ? 'Analyzing...' : 'Analyze Screenshots'}</span>
-            </button>
-          </div>
-        )}
+      {/* Enhanced AI Upload Section */}
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 text-gray-900">AI-Powered Data Entry</h2>
+        <EnhancedUpload
+          onAnalyze={handleEnhancedAnalyze}
+          loading={loading}
+        />
       </div>
 
       {/* Aggregate Summary */}
