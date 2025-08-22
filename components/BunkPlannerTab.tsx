@@ -46,18 +46,22 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
     return Math.max(0, maxCanMiss);
   };
 
-  // Calculate individual subject bunking buffer
+  // Calculate individual subject bunking buffer by semester end
   const calculateSubjectBunkBuffer = (subject: Subject) => {
-    const currentPercentage = calculatePercentage(subject.attended, subject.total);
+    // Estimate remaining hours for this subject based on its proportion of total hours
+    const subjectProportion = aggregate.total > 0 ? subject.total / aggregate.total : 1 / subjects.length;
+    const estimatedRemainingHours = Math.round(remainingHours * subjectProportion);
     
-    // If already below goal, can't miss any
-    if (currentPercentage < subject.goal) return 0;
+    // Total hours by semester end for this subject
+    const totalHoursBySemesterEnd = subject.total + estimatedRemainingHours;
     
-    // Formula: (current_attended * 100 - goal * current_total) / goal
-    // This gives the number of classes that can be missed while maintaining the goal
-    const buffer = Math.floor((100 * subject.attended - subject.goal * subject.total) / subject.goal);
+    // Minimum hours needed to achieve goal by semester end
+    const minHoursNeeded = Math.ceil((subject.goal * totalHoursBySemesterEnd) / 100);
     
-    return Math.max(0, buffer);
+    // Maximum hours that can be missed
+    const maxCanMiss = subject.attended + estimatedRemainingHours - minHoursNeeded;
+    
+    return Math.max(0, maxCanMiss);
   };
 
   const aggregateBuffer = calculateAggregateBunkBuffer();
