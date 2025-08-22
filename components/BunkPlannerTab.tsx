@@ -20,17 +20,28 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
 
   const aggregate = calculateAggregate();
   const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
+  
+  // Calculate remaining hours based on current class rate
+  const calculateRemainingHours = () => {
+    if (aggregate.total === 0) return remainingDays; // fallback
+    // Assume similar class rate continues (total hours / days passed so far)
+    const daysPassedApprox = 100; // approximate days in semester so far
+    const hoursPerDay = aggregate.total / daysPassedApprox;
+    return Math.round(remainingDays * hoursPerDay);
+  };
+  
+  const remainingHours = calculateRemainingHours();
 
   // Calculate aggregate bunking buffer by semester end
   const calculateAggregateBunkBuffer = () => {
-    // Total classes by semester end (current + remaining)
-    const totalClassesBySemesterEnd = aggregate.total + remainingDays;
+    // Total hours by semester end (current + remaining)
+    const totalHoursBySemesterEnd = aggregate.total + remainingHours;
     
-    // Minimum classes needed to achieve goal by semester end
-    const minClassesNeeded = Math.ceil((settings.aggregateGoal * totalClassesBySemesterEnd) / 100);
+    // Minimum hours needed to achieve goal by semester end
+    const minHoursNeeded = Math.ceil((settings.aggregateGoal * totalHoursBySemesterEnd) / 100);
     
-    // Maximum classes that can be missed
-    const maxCanMiss = aggregate.attended + remainingDays - minClassesNeeded;
+    // Maximum hours that can be missed
+    const maxCanMiss = aggregate.attended + remainingHours - minHoursNeeded;
     
     return Math.max(0, maxCanMiss);
   };
@@ -62,12 +73,12 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
             <div className="text-4xl font-bold text-blue-600 mb-2">
               {aggregateBuffer}
             </div>
-            <div className="text-lg text-blue-800 mb-2">Classes you can miss</div>
+            <div className="text-lg text-blue-800 mb-2">Hours you can miss</div>
             <div className="text-sm text-blue-600">
               Current: {aggregate.attended}/{aggregate.total} ({calculatePercentage(aggregate.attended, aggregate.total).toFixed(1)}%)
             </div>
             <div className="text-sm text-blue-600">
-              Goal: {settings.aggregateGoal}% • Days left: {remainingDays}
+              Goal: {settings.aggregateGoal}% • Hours left: {remainingHours}
             </div>
           </div>
         </div>
@@ -80,8 +91,8 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
             </div>
           </div>
           <div className="bg-gray-50 p-3 rounded">
-            <div className="font-medium text-gray-700">Remaining Days</div>
-            <div className="text-lg font-bold text-gray-900">{remainingDays}</div>
+            <div className="font-medium text-gray-700">Remaining Hours</div>
+            <div className="text-lg font-bold text-gray-900">{remainingHours}</div>
           </div>
           <div className="bg-gray-50 p-3 rounded">
             <div className="font-medium text-gray-700">Target Goal</div>
@@ -129,17 +140,17 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
                     }`}>
                       {buffer}
                     </div>
-                    <div className="text-sm text-gray-600">classes can miss</div>
+                    <div className="text-sm text-gray-600">hours can miss</div>
                   </div>
                   
                   <div className="text-xs text-gray-500 space-y-1">
                     <div>Goal: {subject.goal}%</div>
                     <div>
                       {buffer > 0 
-                        ? `Can miss ${buffer} and still reach goal`
+                        ? `Can miss ${buffer} hours and still reach goal`
                         : currentPercentage < subject.goal
-                          ? 'Need to attend more classes'
-                          : 'Cannot miss any classes'
+                          ? 'Need to attend more hours'
+                          : 'Cannot miss any hours'
                       }
                     </div>
                   </div>
