@@ -150,7 +150,20 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
     if (status === 'danger') return 'Goal impossible';
     
     const required = calculateRequiredClasses(subject.attended, subject.total, subject.goal);
-    return `Need ${required} more classes`;
+    
+    // Calculate target date
+    const today = new Date();
+    const targetDate = new Date(today);
+    let workingDaysAdded = 0;
+    
+    while (workingDaysAdded < required) {
+      targetDate.setDate(targetDate.getDate() + 1);
+      if (isWorkingDay(targetDate)) {
+        workingDaysAdded++;
+      }
+    }
+    
+    return `Goal by ${targetDate.toLocaleDateString()} (${required} classes)`;
   };
 
   const getAggregateStatusMessage = () => {

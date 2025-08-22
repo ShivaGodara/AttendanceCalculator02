@@ -32,40 +32,40 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
         <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Bunking Buffer Calculator</h2>
         
         {/* Aggregate Buffer */}
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-medium text-blue-900 mb-2">Overall Bunking Buffer</h3>
-          <div className="text-2xl font-bold text-blue-600">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+          <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Overall Bunking Buffer</h3>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {calculateBunkingBuffer(aggregate.attended, aggregate.total, settings.aggregateGoal)} classes
           </div>
-          <p className="text-sm text-blue-700 mt-1">
-            You can miss this many classes without falling below your {settings.aggregateGoal}% goal
+          <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+            You can miss this many classes and still reach your {settings.aggregateGoal}% goal
           </p>
         </div>
 
         {/* Individual Subject Buffers */}
         <div className="space-y-3">
-          <h3 className="font-medium text-gray-900">Individual Subject Buffers</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100">Individual Subject Buffers</h3>
           {subjects.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No subjects available. Add subjects in the Analysis tab.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center py-4">No subjects available. Add subjects in the Analysis tab.</p>
           ) : (
             subjects.map((subject) => {
               const buffer = calculateBunkingBuffer(subject.attended, subject.total, subject.goal);
               const currentPercentage = calculatePercentage(subject.attended, subject.total);
               
               return (
-                <div key={subject.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div key={subject.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
-                    <span className="font-medium">{subject.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">
+                    <span className="font-medium text-gray-900 dark:text-gray-100">{subject.name}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
                       ({currentPercentage.toFixed(1)}% current)
                     </span>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-lg">
+                    <div className="font-bold text-lg text-gray-900 dark:text-gray-100">
                       {buffer} classes
                     </div>
-                    <div className="text-xs text-gray-600">
-                      can miss
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      can miss & reach {subject.goal}%
                     </div>
                   </div>
                 </div>
