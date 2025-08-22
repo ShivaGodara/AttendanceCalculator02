@@ -8,6 +8,7 @@ import BunkPlannerTab from '@/components/BunkPlannerTab';
 import LeaveAnalysisTab from '@/components/LeaveAnalysisTab';
 import SettingsPanel from '@/components/SettingsPanel';
 import Toast from '@/components/Toast';
+import WelcomeModal from '@/components/WelcomeModal';
 import { Settings as SettingsIcon, BarChart3, Calendar, FileText, Sun, Moon } from 'lucide-react';
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
   const [appData, setAppData] = useState<AppData>({
     subjects: [],
     settings: {
@@ -36,7 +38,18 @@ export default function Home() {
     if (savedDarkMode !== null) {
       setDarkMode(savedDarkMode);
     }
+    
+    // Show welcome modal for first-time users
+    const hasVisited = loadFromLocalStorage('hasVisited');
+    if (!hasVisited) {
+      setShowWelcome(true);
+    }
   }, []);
+
+  const handleWelcomeClose = () => {
+    setShowWelcome(false);
+    saveToLocalStorage('hasVisited', true);
+  };
 
   useEffect(() => {
     setSaveStatus('saving');
@@ -63,7 +76,19 @@ export default function Home() {
   };
 
   const updateSettings = (settings: Settings) => {
-    setAppData(prev => ({ ...prev, settings }));
+    setAppData(prev => {
+      // Update existing subjects with new individual goal if they're using the old default
+      const updatedSubjects = prev.subjects.map(subject => ({
+        ...subject,
+        goal: subject.goal === prev.settings.individualGoal ? settings.individualGoal : subject.goal
+      }));
+      
+      return {
+        ...prev,
+        settings,
+        subjects: updatedSubjects
+      };
+    });
   };
 
   const clearAllData = () => {
@@ -236,6 +261,11 @@ export default function Home() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Welcome Modal */}
+      {showWelcome && (
+        <WelcomeModal onClose={handleWelcomeClose} />
       )}
 
       {/* Toast Notification */}
