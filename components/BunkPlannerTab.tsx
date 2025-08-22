@@ -10,8 +10,6 @@ interface Props {
 }
 
 export default function BunkPlannerTab({ subjects, settings }: Props) {
-  const [extraAttended, setExtraAttended] = useState(0);
-  const [extraHeld, setExtraHeld] = useState(0);
 
   const calculateAggregate = () => {
     if (subjects.length === 0) return { attended: 0, total: 0 };
@@ -25,11 +23,7 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
   const aggregate = calculateAggregate();
   const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
 
-  const simulateScenario = () => {
-    const newAttended = aggregate.attended + extraAttended;
-    const newTotal = aggregate.total + extraHeld;
-    return calculatePercentage(newAttended, newTotal);
-  };
+
 
   return (
     <div className="space-y-6">
@@ -81,88 +75,11 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
         </div>
       </div>
 
-      {/* What If Simulator */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg dark:shadow-gray-900/50 p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">'What If?' Simulator</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Extra Classes You Attend
-              </label>
-              <input
-                type="number"
-                value={extraAttended}
-                onChange={(e) => setExtraAttended(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                placeholder="0"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-                Extra Classes Held
-              </label>
-              <input
-                type="number"
-                value={extraHeld}
-                onChange={(e) => setExtraHeld(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                placeholder="0"
-              />
-            </div>
 
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              <p>Remaining working days: {remainingDays}</p>
-              <p>Current aggregate: {calculatePercentage(aggregate.attended, aggregate.total).toFixed(1)}%</p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center">
-            <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
-              <div className="text-sm text-gray-600 mb-2">Projected Final Percentage</div>
-              <div className="text-4xl font-bold text-blue-600">
-                {simulateScenario().toFixed(1)}%
-              </div>
-              <div className="text-sm text-gray-600 mt-2">
-                {simulateScenario() >= settings.aggregateGoal ? (
-                  <span className="text-green-600 font-medium">✓ Goal Achieved</span>
-                ) : (
-                  <span className="text-red-600 font-medium">✗ Below Goal</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Scenario Analysis */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-medium text-gray-900 mb-2">Scenario Analysis</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Current Total:</span>
-              <div className="font-medium">{aggregate.attended} / {aggregate.total}</div>
-            </div>
-            <div>
-              <span className="text-gray-600">After Scenario:</span>
-              <div className="font-medium">
-                {aggregate.attended + extraAttended} / {aggregate.total + extraHeld}
-              </div>
-            </div>
-            <div>
-              <span className="text-gray-600">Difference:</span>
-              <div className="font-medium">
-                {(simulateScenario() - calculatePercentage(aggregate.attended, aggregate.total)).toFixed(1)}%
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Quick Scenarios */}
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg dark:shadow-gray-900/50 p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Quick Scenarios</h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Future Projections</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
             { label: 'Perfect Attendance', attended: remainingDays, held: remainingDays },
@@ -177,17 +94,13 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
             return (
               <div
                 key={index}
-                className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 bg-white dark:bg-gray-900"
-                onClick={() => {
-                  setExtraAttended(scenario.attended);
-                  setExtraHeld(scenario.held);
-                }}
+                className="p-4 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900"
               >
-                <div className="font-medium text-gray-900">{scenario.label}</div>
+                <div className="font-medium text-gray-900 dark:text-gray-100">{scenario.label}</div>
                 <div className="text-2xl font-bold text-blue-600 my-1">
                   {projectedPercentage.toFixed(1)}%
                 </div>
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
                   +{scenario.attended} / +{scenario.held} classes
                 </div>
               </div>
