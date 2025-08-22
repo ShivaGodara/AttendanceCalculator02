@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       
       Count colored text entries:
       - GREEN text = co-curricular leaves
-      - ORANGE/YELLOW text = medical leaves
+      - ORANGE text = medical leaves
       
       Return JSON: {"cocurricular": number, "medical": number, "attendance": {"attended": number, "total": number}}`;
     }
