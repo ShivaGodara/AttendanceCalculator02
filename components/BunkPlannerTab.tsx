@@ -155,45 +155,7 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
         )}
       </div>
 
-      {/* Future Projections */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900">Semester End Projections</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { label: 'Perfect Attendance', rate: 1.0 },
-            { label: '80% Attendance', rate: 0.8 },
-            { label: '60% Attendance', rate: 0.6 }
-          ].map((scenario, index) => {
-            const attendedClasses = Math.floor(remainingDays * scenario.rate);
-            const projectedPercentage = calculatePercentage(
-              aggregate.attended + attendedClasses,
-              aggregate.total + remainingDays
-            );
-            
-            return (
-              <div
-                key={index}
-                className="p-4 border border-gray-200 rounded-lg bg-gray-50"
-              >
-                <div className="font-medium text-gray-900 mb-2">{scenario.label}</div>
-                <div className="text-2xl font-bold text-blue-600 mb-1">
-                  {projectedPercentage.toFixed(1)}%
-                </div>
-                <div className="text-xs text-gray-600">
-                  +{attendedClasses} / +{remainingDays} classes
-                </div>
-                <div className={`text-xs mt-1 ${
-                  projectedPercentage >= settings.aggregateGoal 
-                    ? 'text-green-600' 
-                    : 'text-red-600'
-                }`}>
-                  {projectedPercentage >= settings.aggregateGoal ? '✓ Goal achieved' : '✗ Below goal'}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+
     </div>
   );
 }
