@@ -45,12 +45,10 @@ export default function LeaveAnalysisTab({ subjects }: Props) {
       let totalCocurricular = 0;
       let totalMedical = 0;
 
-      // Analyze each file and sum up the results
-      for (const file of absenceFiles) {
-        const result = await analyzeLeaves(file);
-        totalCocurricular += result.cocurricular || 0;
-        totalMedical += result.medical || 0;
-      }
+      // Analyze all files at once
+      const result = await analyzeLeaves(absenceFiles);
+      totalCocurricular = result.cocurricular || 0;
+      totalMedical = result.medical || 0;
 
       setLeaveResult({
         cocurricular: totalCocurricular,
