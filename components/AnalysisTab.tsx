@@ -121,50 +121,46 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
     const status = getAttendanceStatus(percentage, subject.goal, subject.attended, subject.total, settings.semesterEndDate);
     
     if (status === 'safe') return 'Goal met';
-    if (status === 'danger') return 'Goal impossible';
     
-    const required = calculateRequiredClasses(subject.attended, subject.total, subject.goal);
+    const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
+    const semesterEndDate = new Date(settings.semesterEndDate);
     
-    // Calculate target date
-    const today = new Date();
-    const targetDate = new Date(today);
-    let workingDaysAdded = 0;
+    // Assume same rate of classes for this subject as overall average
+    const subjectClassesPerDay = subject.total > 0 ? subject.total / 100 : 0.5; // fallback
+    const estimatedRemainingClasses = Math.round(remainingDays * subjectClassesPerDay);
     
-    while (workingDaysAdded < required) {
-      targetDate.setDate(targetDate.getDate() + 1);
-      if (isWorkingDay(targetDate)) {
-        workingDaysAdded++;
-      }
+    const finalAttended = subject.attended + estimatedRemainingClasses;
+    const finalTotal = subject.total + estimatedRemainingClasses;
+    const finalPercentage = calculatePercentage(finalAttended, finalTotal);
+    
+    if (finalPercentage >= subject.goal) {
+      return `Will reach ${finalPercentage.toFixed(1)}% by semester end`;
+    } else {
+      const requiredAttended = Math.ceil((subject.goal * finalTotal) / 100);
+      const additionalHours = requiredAttended - finalAttended;
+      return `Cannot reach goal. Need ${additionalHours} more hours`;
     }
-    
-    return `Goal by ${targetDate.toLocaleDateString()} (${required} classes)`;
   };
 
   const getAggregateStatusMessage = () => {
     if (aggregateStatus === 'safe') return 'Goal achieved!';
     
-    if (aggregateStatus === 'danger') {
-      const required = calculateRequiredClasses(aggregate.attended, aggregate.total, settings.aggregateGoal);
-      const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
-      const shortfall = required - remainingDays;
-      return `Impossible. Missed by ${shortfall} hours.`;
+    const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
+    const semesterEndDate = new Date(settings.semesterEndDate);
+    
+    // Calculate final percentage if attending all remaining classes
+    const finalAttended = aggregate.attended + remainingDays;
+    const finalTotal = aggregate.total + remainingDays;
+    const finalPercentage = calculatePercentage(finalAttended, finalTotal);
+    
+    if (finalPercentage >= settings.aggregateGoal) {
+      return `Will reach ${finalPercentage.toFixed(1)}% by semester end (${semesterEndDate.toLocaleDateString()})`;
+    } else {
+      // Calculate how many more hours needed to reach goal
+      const requiredAttended = Math.ceil((settings.aggregateGoal * finalTotal) / 100);
+      const additionalHours = requiredAttended - finalAttended;
+      return `Cannot reach goal. Need ${additionalHours} more hours to achieve ${settings.aggregateGoal}%`;
     }
-    
-    const required = calculateRequiredClasses(aggregate.attended, aggregate.total, settings.aggregateGoal);
-    const today = new Date();
-    const targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + required);
-    
-    // Skip weekends and holidays
-    let workingDaysAdded = 0;
-    while (workingDaysAdded < required) {
-      targetDate.setDate(targetDate.getDate() + 1);
-      if (isWorkingDay(targetDate)) {
-        workingDaysAdded++;
-      }
-    }
-    
-    return `Goal will be reached by ${targetDate.toLocaleDateString()}`;
   };
 
   return (
