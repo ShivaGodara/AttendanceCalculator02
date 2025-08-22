@@ -11,61 +11,61 @@ export async function POST(request: NextRequest) {
     
     let prompt = '';
     if (type === 'timetable') {
-      prompt = `This is a mobile screenshot that may contain browser UI, headers, and other elements. 
+      prompt = `IMPORTANT: This screenshot contains mobile browser UI and website elements that must be ignored.
       
-      STEP 1: Identify and focus ONLY on the timetable/schedule table content. Ignore:
-      - Mobile browser UI (address bar, status bar)
-      - Website headers and navigation
-      - Footer content
-      - Any content outside the actual timetable
+      VISUAL CROPPING INSTRUCTIONS:
+      1. Locate the main data table in the center of the image
+      2. Ignore everything above the table (browser bar, website header, navigation)
+      3. Ignore everything below the table (footer, copyright, buttons)
+      4. Focus ONLY on the table with days and subject names
       
-      STEP 2: From the focused timetable area, extract schedule information.
-      Return a JSON object with this structure:
+      EXTRACT from the cropped table area:
+      - Days of the week (Monday, Tuesday, etc.)
+      - Subject names in each time slot
+      - Ignore time periods and room numbers
+      
+      Return JSON:
       {
         "schedule": [
-          {
-            "day": "Monday",
-            "subjects": ["Subject1", "Subject2"]
-          }
+          {"day": "Monday", "subjects": ["ADVANCED PYTHON", "CLOUD COMPUTING"]},
+          {"day": "Tuesday", "subjects": ["MINI PROJECT", "ARTIFICIAL INTELLIGENCE"]}
         ]
       }
-      Only include subject names from the table cells, ignore time slots and periods. Combine similar subjects.`;
+      
+      Combine similar subjects (Theory + Practical = one subject name).`;
     } else if (type === 'attendance') {
-      prompt = `This is a mobile screenshot that may contain browser UI, headers, and other elements.
+      prompt = `IMPORTANT: This screenshot contains mobile browser UI that must be ignored.
       
-      STEP 1: Identify and focus ONLY on the attendance table/data. Ignore:
-      - Mobile browser UI (address bar, status bar, battery indicator)
-      - Website headers, navigation, and logos
-      - Footer content and copyright text
-      - Any buttons or UI elements outside the attendance table
+      VISUAL CROPPING INSTRUCTIONS:
+      1. Find the attendance data table (usually has blue header "Attendance")
+      2. Ignore mobile status bar, browser address bar, website logo
+      3. Ignore footer text, buttons, and navigation elements
+      4. Focus ONLY on the table with columns: Subject Name, Conducted, Present, Percentage
       
-      STEP 2: From the focused attendance table, extract data for each subject.
-      Look for columns like: Subject Name, Conducted/Total, Present/Attended, Percentage
+      EXTRACT from the cropped table:
+      - Subject names from the "Subject Name" column
+      - Numbers from "Conducted" column (total classes)
+      - Numbers from "Present" column (attended classes)
       
-      Return JSON with this structure:
+      CRITICAL: Combine Theory + Practical for same subject:
+      Example: "MINI PROJECT Theory: Present=1, Conducted=1" + "MINI PROJECT Practical: Present=18, Conducted=28" 
+      Result: "MINI PROJECT: attended=19, total=29"
+      
+      Return JSON:
       {
         "subjects": [
-          {
-            "name": "Subject Name",
-            "attended": 25,
-            "total": 30
-          }
+          {"name": "MINI PROJECT", "attended": 19, "total": 29},
+          {"name": "AR/VR", "attended": 44, "total": 53}
         ]
-      }
-      
-      IMPORTANT: Combine Theory and Practical entries for the same subject into one total.
-      For example: "MINI PROJECT Theory: 1.0/1.0" + "MINI PROJECT Practical: 18.0/28.0" = "MINI PROJECT: 19.0/29.0"`;
+      }`;
     } else if (type === 'leaves') {
-      prompt = `This is a mobile screenshot of absence/leave details.
+      prompt = `VISUAL CROPPING: Focus only on the absence details table, ignore all browser UI and headers.
       
-      STEP 1: Focus only on the absence details table, ignore browser UI and headers.
+      Count colored text entries:
+      - GREEN text = co-curricular leaves
+      - ORANGE/YELLOW text = medical leaves
       
-      STEP 2: Count leaves by text color:
-      - GREEN text entries = co-curricular leaves
-      - YELLOW/ORANGE text entries = medical leaves
-      
-      Return JSON: {"cocurricular": number, "medical": number, "attendance": {"attended": number, "total": number}}
-      Count the hours/numbers only. Also extract attendance data if visible in the focused area.`;
+      Return JSON: {"cocurricular": number, "medical": number, "attendance": {"attended": number, "total": number}}`;
     }
 
     const result = await model.generateContent([prompt, imageData]);
