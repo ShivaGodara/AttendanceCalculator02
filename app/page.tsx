@@ -9,7 +9,7 @@ import LeaveAnalysisTab from '@/components/LeaveAnalysisTab';
 import SettingsPanel from '@/components/SettingsPanel';
 import Toast from '@/components/Toast';
 import WelcomeModal from '@/components/WelcomeModal';
-import { Settings as SettingsIcon, BarChart3, Calendar, FileText } from 'lucide-react';
+import { Settings as SettingsIcon, BarChart3, Calendar, FileText, RotateCcw } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('analysis');
@@ -17,6 +17,7 @@ export default function Home() {
 
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [showStartOverDialog, setShowStartOverDialog] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [appData, setAppData] = useState<AppData>({
@@ -96,6 +97,30 @@ export default function Home() {
     setToast({ type: 'success', message: 'All data cleared successfully!' });
   };
 
+  const startOver = () => {
+    // Reset to default state
+    setAppData({
+      subjects: [],
+      settings: {
+        individualGoal: 75,
+        aggregateGoal: 75,
+        semesterEndDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      },
+      timetable: []
+    });
+    
+    // Clear localStorage
+    localStorage.removeItem('attendanceData');
+    localStorage.removeItem('hasVisited');
+    
+    // Reset UI state
+    setActiveTab('analysis');
+    setShowStartOverDialog(false);
+    setShowWelcome(true);
+    
+    setToast({ type: 'success', message: 'App reset to default settings!' });
+  };
+
   const exportData = () => {
     const dataStr = JSON.stringify(appData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -159,8 +184,15 @@ export default function Home() {
               
 
               <button
+                onClick={() => setShowStartOverDialog(true)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
+                title="Start Over"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </button>
+              <button
                 onClick={() => setShowSettings(true)}
-                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg"
               >
                 <SettingsIcon className="w-5 h-5" />
               </button>
@@ -226,15 +258,15 @@ export default function Home() {
       {/* Clear Data Confirmation Dialog */}
       {showClearDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Clear All Data</h3>
-            <p className="text-gray-700 dark:text-gray-300 mb-6">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Clear All Data</h3>
+            <p className="text-gray-700 mb-6">
               This will permanently delete all subjects, settings, and data. This action cannot be undone.
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowClearDialog(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-500 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Cancel
               </button>
@@ -243,6 +275,32 @@ export default function Home() {
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Clear All Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Start Over Confirmation Dialog */}
+      {showStartOverDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Start Over</h3>
+            <p className="text-gray-700 mb-6">
+              This will reset the app to default settings, clear all data, and show the welcome screen again. This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowStartOverDialog(false)}
+                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startOver}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Start Over
               </button>
             </div>
           </div>
