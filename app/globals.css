@@ -172,7 +172,11 @@
 }
 
 .dark .bg-green-50 {
-  background-color: rgba(72, 187, 120, 0.1);
+  background-color: rgba(72, 187, 120, 0.15);
+}
+
+.dark .bg-red-50 {
+  background-color: rgba(245, 101, 101, 0.15);
 }
 
 .dark .bg-emerald-600 {
@@ -191,9 +195,7 @@
   color: #FC8181;
 }
 
-.dark .bg-red-50 {
-  background-color: rgba(245, 101, 101, 0.1);
-}
+
 
 .dark .bg-red-600 {
   background-color: #E53E3E;
@@ -204,11 +206,11 @@
 }
 
 .dark .bg-yellow-50 {
-  background-color: rgba(237, 137, 54, 0.1);
+  background-color: rgba(56, 178, 172, 0.15);
 }
 
 .dark .bg-blue-50 {
-  background-color: rgba(56, 178, 172, 0.1);
+  background-color: rgba(56, 178, 172, 0.15);
 }
 
 .dark .text-blue-700,
