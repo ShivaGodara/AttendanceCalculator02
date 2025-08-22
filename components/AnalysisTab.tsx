@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Subject, Settings } from '@/types';
-import { calculatePercentage, getAttendanceStatus, getStatusColor, calculateRequiredClasses } from '@/lib/utils';
+import { calculatePercentage, getAttendanceStatus, getStatusColor, calculateRequiredClasses, getRemainingWorkingDays, isWorkingDay } from '@/lib/utils';
 import { analyzeTimetable, analyzeAttendance } from '@/lib/gemini';
 import { Upload, Plus, Trash2, AlertCircle, RefreshCw, X } from 'lucide-react';
 import Toast from './Toast';
@@ -153,6 +153,33 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
     return `Need ${required} more classes`;
   };
 
+  const getAggregateStatusMessage = () => {
+    if (aggregateStatus === 'safe') return 'Goal achieved!';
+    
+    if (aggregateStatus === 'danger') {
+      const required = calculateRequiredClasses(aggregate.attended, aggregate.total, settings.aggregateGoal);
+      const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
+      const shortfall = required - remainingDays;
+      return `Impossible. Missed by ${shortfall} hours.`;
+    }
+    
+    const required = calculateRequiredClasses(aggregate.attended, aggregate.total, settings.aggregateGoal);
+    const today = new Date();
+    const targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + required);
+    
+    // Skip weekends and holidays
+    let workingDaysAdded = 0;
+    while (workingDaysAdded < required) {
+      targetDate.setDate(targetDate.getDate() + 1);
+      if (isWorkingDay(targetDate)) {
+        workingDaysAdded++;
+      }
+    }
+    
+    return `Goal will be reached by ${targetDate.toLocaleDateString()}`;
+  };
+
   return (
     <div className="space-y-6">
       {/* Error Display */}
@@ -278,10 +305,7 @@ export default function AnalysisTab({ subjects, settings, onUpdateSubjects }: Pr
           {aggregate.attended} / {aggregate.total} hours attended
         </p>
         <p className="text-sm mt-1">
-          Goal: {settings.aggregateGoal}% • 
-          {aggregateStatus === 'safe' && ' Goal achieved!'}
-          {aggregateStatus === 'warning' && ` Need ${calculateRequiredClasses(aggregate.attended, aggregate.total, settings.aggregateGoal)} more hours`}
-          {aggregateStatus === 'danger' && ' Goal impossible to achieve'}
+          Goal: {settings.aggregateGoal}% • {getAggregateStatusMessage()}
         </p>
       </div>
 
