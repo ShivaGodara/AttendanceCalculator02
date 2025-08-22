@@ -21,18 +21,18 @@ export default function BunkPlannerTab({ subjects, settings }: Props) {
   const aggregate = calculateAggregate();
   const remainingDays = getRemainingWorkingDays(settings.semesterEndDate);
 
-  // Calculate aggregate bunking buffer
+  // Calculate aggregate bunking buffer by semester end
   const calculateAggregateBunkBuffer = () => {
-    const currentPercentage = calculatePercentage(aggregate.attended, aggregate.total);
+    // Total classes by semester end (current + remaining)
+    const totalClassesBySemesterEnd = aggregate.total + remainingDays;
     
-    // If already below goal, can't miss any
-    if (currentPercentage < settings.aggregateGoal) return 0;
+    // Minimum classes needed to achieve goal by semester end
+    const minClassesNeeded = Math.ceil((settings.aggregateGoal * totalClassesBySemesterEnd) / 100);
     
-    // Formula: (current_attended * 100 - goal * current_total) / goal
-    // This gives the number of classes that can be missed while maintaining the goal
-    const buffer = Math.floor((100 * aggregate.attended - settings.aggregateGoal * aggregate.total) / settings.aggregateGoal);
+    // Maximum classes that can be missed
+    const maxCanMiss = aggregate.attended + remainingDays - minClassesNeeded;
     
-    return Math.max(0, buffer);
+    return Math.max(0, maxCanMiss);
   };
 
   // Calculate individual subject bunking buffer
