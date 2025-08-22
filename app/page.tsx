@@ -34,8 +34,8 @@ export default function Home() {
     if (saved) {
       setAppData(saved);
     }
-    // Always enable dark mode
-    document.documentElement.classList.add('dark');
+    // Remove dark mode
+    document.documentElement.classList.remove('dark');
     
     // Show welcome modal for first-time users
     const hasVisited = loadFromLocalStorage('hasVisited');
