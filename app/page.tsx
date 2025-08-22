@@ -9,12 +9,12 @@ import LeaveAnalysisTab from '@/components/LeaveAnalysisTab';
 import SettingsPanel from '@/components/SettingsPanel';
 import Toast from '@/components/Toast';
 import WelcomeModal from '@/components/WelcomeModal';
-import { Settings as SettingsIcon, BarChart3, Calendar, FileText, Sun, Moon } from 'lucide-react';
+import { Settings as SettingsIcon, BarChart3, Calendar, FileText } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('analysis');
   const [showSettings, setShowSettings] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved');
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
@@ -34,10 +34,8 @@ export default function Home() {
     if (saved) {
       setAppData(saved);
     }
-    const savedDarkMode = loadFromLocalStorage('darkMode');
-    if (savedDarkMode !== null) {
-      setDarkMode(savedDarkMode);
-    }
+    // Always enable dark mode
+    document.documentElement.classList.add('dark');
     
     // Show welcome modal for first-time users
     const hasVisited = loadFromLocalStorage('hasVisited');
@@ -62,14 +60,7 @@ export default function Home() {
     }
   }, [appData]);
 
-  useEffect(() => {
-    saveToLocalStorage('darkMode', darkMode);
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [darkMode]);
+
 
   const updateSubjects = (subjects: Subject[]) => {
     setAppData(prev => ({ ...prev, subjects }));
@@ -166,12 +157,7 @@ export default function Home() {
                 </span>
               </div>
               
-              <button
-                onClick={() => setDarkMode(!darkMode)}
-                className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-              >
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
+
               <button
                 onClick={() => setShowSettings(true)}
                 className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
